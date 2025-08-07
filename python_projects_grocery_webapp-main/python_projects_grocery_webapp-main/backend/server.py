@@ -1,15 +1,15 @@
 from flask import Flask, request, jsonify
-from sql_connection import 
-import mysql.connector
 import json
 
 import products_dao
 import orders_dao
 import uom_dao
 
-app = Flask(__name__)
+from sql_connection import DatabaseConnection
+postgres_connection = DatabaseConnection('grocerydb', 'postgres', 'root123#', 'localhost', 5432)
+connection = postgres_connection.get_connection()
 
-connection = get_sql_connection()
+app = Flask(__name__)
 
 @app.route('/getUOM', methods=['GET'])
 def get_uom():

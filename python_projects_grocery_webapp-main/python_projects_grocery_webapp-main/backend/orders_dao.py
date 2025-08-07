@@ -1,10 +1,9 @@
 from datetime import datetime
+
+# Testing purpose only.
 from sql_connection import DatabaseConnection
 
-postgres_connection = DatabaseConnection('grocerydb', 'postgres', 'root123#', 'localhost', 5432)
-db_connection = postgres_connection.get_connection()
-
-def insert_order(order):    
+def insert_order(db_connection, order):    
     try:
         with db_connection.cursor() as cursor:
             order_query = ("INSERT INTO orders (customer_id, order_date, status) VALUES (%s, %s, %s)")
@@ -13,14 +12,14 @@ def insert_order(order):
             cursor.execute(order_query, order_data)
             order_id = cursor.lastrowid
                         
-            postgres_connection.connection.commit()
+            db_connection.commit()
 
             return order_id
     except Exception as e:
-            postgres_connection.connection.rollback()
+            db_connection.rollback()
             raise e
         
-def insert_order_item(order_item):    
+def insert_order_item(db_connection, order_item):    
     try:
         with db_connection.cursor() as cursor:
 
@@ -28,24 +27,24 @@ def insert_order_item(order_item):
             item = [order_item['order_id'], order_item['product_id'], order_item['quantity'], order_item['unit_price']]
             
             cursor.execute(order_details_query, item)
-            postgres_connection.connection.commit()            
+            db_connection.commit()            
             order_item_id = cursor.lastrowid
             
             order_id = order_item['order_id']
             update_order(order_id, {'total_cost': int(order_item['unit_price']) * int(order_item['quantity'])})
             return order_item_id
     except Exception as e:
-            postgres_connection.connection.rollback()
+            db_connection.rollback()
             raise e
         
-def update_order(order_id, data):
+def update_order(db_connection, order_id, data):
     try:
         with db_connection.cursor() as cursor:
             query = "UPDATE orders SET total_cost = %s WHERE order_id = %s"
             cursor.execute(query, (data['total_cost'], order_id))
-            postgres_connection.connection.commit()
+            db_connection.commit()
     except Exception as e:          
-        postgres_connection.connection.rollback()
+        db_connection.rollback()
         raise e
     
 def get_order_details(order_id):     
@@ -58,7 +57,10 @@ def get_all_orders():
 
 if __name__ == '__main__':
     
-    order_id = insert_order({
+    postgres_connection = DatabaseConnection('grocerydb', 'postgres', 'root123#', 'localhost', 5432)
+    connection = postgres_connection.get_connection()
+    
+    order_id = insert_order(connection, {
                 'customer_id': 1, 
                 'order_date': datetime.now(),                
                 'status': 'completed'               
@@ -66,7 +68,7 @@ if __name__ == '__main__':
     
     print(order_id)
         
-    print(insert_order_item({
+    print(insert_order_item(connection, {
                 'order_id': 15,
                 'product_id': '5', 
                 'quantity': '2',

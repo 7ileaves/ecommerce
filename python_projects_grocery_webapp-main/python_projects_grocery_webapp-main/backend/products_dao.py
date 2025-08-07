@@ -1,9 +1,9 @@
 import pandas as pd
-from sql_connection import DatabaseConnection
-postgres_connection = DatabaseConnection('grocerydb', 'postgres', 'root123#', 'localhost', 5432)
-db_connection = postgres_connection.get_connection()
 
-def get_all_products():
+# Testing purpose only.
+from sql_connection import DatabaseConnection
+
+def get_all_products(db_connection):
     try:
         with db_connection.cursor() as cursor:
             #query = ("SELECT * FROM products INNER JOIN uom USING(uom_id)")
@@ -20,10 +20,10 @@ def get_all_products():
             })
             return response
     except Exception as e:
-        postgres_connection.connection.rollback()
+        db_connection.rollback()
         raise e
 
-def insert_new_product(product):
+def insert_new_product(db_connection, product):
     try:
         with db_connection.cursor() as cursor:
     
@@ -33,23 +33,23 @@ def insert_new_product(product):
             data = (product['name'], product['description'], product['price'], product['uom_id'])
 
             cursor.execute(query, data)
-            postgres_connection.connection.commit()
+            db_connection.connection.commit()
             
 
             return cursor.lastrowid
     except Exception as e:
-        postgres_connection.connection.rollback()
+        db_connection.rollback()
         raise e
 
-def delete_product(product_id):
+def delete_product(db_connection, product_id):
     try:
         with db_connection.cursor() as cursor:
             query = ("DELETE FROM products where product_id=" + str(product_id))
             cursor.execute(query)
-            postgres_connection.connection.commit()
+            db_connection.commit()
             return cursor.lastrowid
     except Exception as e:
-        postgres_connection.connection.rollback()
+        db_connection.rollback()
         raise e
     cursor = db_connection.cursor()
 
@@ -66,7 +66,11 @@ if __name__ == '__main__':
     df = pd.DataFrame(response)
     print(df)
     '''
-    delete_product(200)
-    response = get_all_products() 
+     
+    postgres_connection = DatabaseConnection('grocerydb', 'postgres', 'root123#', 'localhost', 5432)
+    connection = postgres_connection.get_connection()
+
+    delete_product(connection, 11)
+    response = get_all_products(connection) 
     df = pd.DataFrame(response)
     print(df)
