@@ -132,6 +132,7 @@
                 // Loop through the data and create table rows    
                 data.forEach(([id, name, description, price, quantity]) => {                       
                     // Create a new table row
+                    console.log(id, name, description, price, quantity);
                     const row = document.createElement("tr");
                     // Add the product data to the row
                     row.innerHTML = `
@@ -141,8 +142,8 @@
                         <td><button>Delete</button></td>
                      `;
                     console.log(row);
-                    tbody.insertAdjacentHTML("beforeend", row.outerHTML);
-                    //tbody.appendChild(row);
+                    //tbody.insertAdjacentHTML("beforeend", row.outerHTML);
+                    tbody.appendChild(row);
                 });
             })
             .catch((error) => console.error("Error fetching products:", error));
